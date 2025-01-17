@@ -46,7 +46,8 @@ public class LoginActivity extends AppCompatActivity {
               if(!validateUsername() | !validatePassword()){
 
               }else{
-                  ckeckUser();
+                  checkUser();
+
               }
             }
 

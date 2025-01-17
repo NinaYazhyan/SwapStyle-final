@@ -13,13 +13,21 @@
         android:theme="@style/Theme.SignupLoginRealtime"
         tools:targetApi="31">
         <activity
+            android:name=".EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditProfile"
+            android:exported="false" /> <!-- Remove this entry, as ProfileFragment is not an activity -->
+        <!-- <activity android:name=".FragmentProfile" android:exported="false" /> -->
+        <activity
+            android:name=".SignupActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".SignupActivity"
-            android:exported="false">
-
-        </activity>
+            android:name=".DashboardActivity"
+            android:exported="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

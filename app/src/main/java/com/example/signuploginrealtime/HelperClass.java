@@ -4,7 +4,7 @@ public class HelperClass {
     public HelperClass() {
     }
 
-    String name, email, username, password;
+    String name, email, username, password,location;
 
     public String getEmail() {
         return email;
@@ -38,10 +38,20 @@ public class HelperClass {
         this.name = name;
     }
 
-    public HelperClass(String password, String username, String email, String name) {
-        this.password = password;
-        this.username = username;
-        this.email = email;
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String name) {
+        this.location = location;
+    }
+
+    public HelperClass(String name, String email, String username, String password, String location) {
+
         this.name = name;
+        this.email = email;
+        this.username = username;
+        this.password = password;
+        this.location=location;
     }
 }
