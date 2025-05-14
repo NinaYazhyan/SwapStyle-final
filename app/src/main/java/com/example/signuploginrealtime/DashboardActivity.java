@@ -1,4 +1,5 @@
 package com.example.signuploginrealtime;
+
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,19 +8,22 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
-
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
 public class DashboardActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private BottomNavigationView bottomNavigationView;
+    private String username, name, email, password, location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment); // Ensure this layout contains the required views
+        setContentView(R.layout.fragment);
+
+        username = getIntent().getStringExtra("username");
+        name = getIntent().getStringExtra("name");
+        email = getIntent().getStringExtra("email");
 
         initializeViews();
         setupToolbar();
@@ -35,7 +39,6 @@ public class DashboardActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-
         if (navigationView != null) {
             navigationView.setCheckedItem(R.id.nav_home);
         }
@@ -68,15 +71,15 @@ public class DashboardActivity extends AppCompatActivity {
                 } else if (itemId == R.id.chat) {
                     replaceFragment(new ChatFragment());
                 } else if (itemId == R.id.profile) {
-                    replaceFragment(new ProfileFragment());
+                    // Instead of launching EditProfileActivity immediately,
+                    // we load the ProfileFragment
+                    replaceFragment(ProfileFragment.newInstance(username, name, email));
                 }
-
                 return true;
             });
         }
     }
 
-    // Method to replace fragments
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

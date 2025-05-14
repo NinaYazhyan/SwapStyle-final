@@ -2,17 +2,13 @@ package com.example.signuploginrealtime;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,104 +17,109 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Objects;
-
 public class LoginActivity extends AppCompatActivity {
 
-    EditText loginUsername, loginPassword;
-    Button loginButton;
-    TextView signupRedirectText;
+    private EditText loginUsername, loginPassword;
+    private DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_login);
 
+        // Initialize Firebase
+        databaseReference = FirebaseDatabase.getInstance().getReference("users");
+
+        // Initialize views
         loginUsername = findViewById(R.id.login_username);
         loginPassword = findViewById(R.id.login_password);
-        signupRedirectText = findViewById(R.id.signupRedirectText);
-        loginButton = findViewById(R.id.login_button);
+        Button loginButton = findViewById(R.id.login_button);
+        TextView signupRedirectText = findViewById(R.id.signupRedirectText);
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-              if(!validateUsername() | !validatePassword()){
-
-              }else{
-                  checkUser();
-
-              }
-            }
-
-            private void ckeckUser() {
-            }
-        });
-
-signupRedirectText.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
-        startActivity(intent);
-
-    }
-});
+        loginButton.setOnClickListener(v -> attemptLogin());
+        signupRedirectText.setOnClickListener(v -> navigateToSignup());
     }
 
-    public Boolean validateUsername() {
-        String val = loginUsername.getText().toString();
-        if (val.isEmpty()) {
+    private void attemptLogin() {
+        if (!validateInputs()) return;
+
+        String username = loginUsername.getText().toString().trim();
+        String password = loginPassword.getText().toString().trim();
+
+        authenticateUser(username, password);
+    }
+
+    private boolean validateInputs() {
+        boolean isValid = true;
+
+        if (loginUsername.getText().toString().trim().isEmpty()) {
             loginUsername.setError("Username cannot be empty");
-            return false;
-
-        } else {
-            loginUsername.setError(null);
-            return true;
+            isValid = false;
         }
-    }
 
-    public Boolean validatePassword() {
-        String val = loginPassword.getText().toString();
-        if (val.isEmpty()) {
+        if (loginPassword.getText().toString().trim().isEmpty()) {
             loginPassword.setError("Password cannot be empty");
-            return false;
-
-        } else {
-            loginPassword.setError(null);
-            return true;
+            isValid = false;
         }
-    }
-    public void  checkUser(){
-        String userUsername = loginUsername.getText().toString();
-        String userPassword = loginPassword.getText().toString();
 
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users");
-        Query checkUserDatabase = reference.orderByChild("username").equalTo(userUsername);
-        checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+        return isValid;
+    }
+
+    private void authenticateUser(String username, String password) {
+        Query userQuery = databaseReference.orderByChild("username").equalTo(username);
+
+        userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    loginUsername.setError(null);
-                    String passwordFrom08 = snapshot.child(userUsername).child("passwprd").getValue(String.class);
-
-                    if(!Objects.equals(passwordFrom08, userPassword)) {
-                        loginUsername.setError(null);
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                    }else{
-                        loginPassword.setError("Invalid Credentials");
-                        loginPassword.requestFocus();
-                    }
-                }else{
+                if (!snapshot.exists()) {
                     loginUsername.setError("User does not exist");
                     loginUsername.requestFocus();
+                    return;
                 }
+
+                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                    User user = userSnapshot.getValue(User.class);
+                    if (user != null && user.password.equals(password)) {
+                        handleSuccessfulLogin(username, user.name, user.email);
+                        return;
+                    }
+                }
+
+                loginPassword.setError("Invalid password");
+                loginPassword.requestFocus();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                showDatabaseError(error);
             }
         });
+    }
+
+    private void handleSuccessfulLogin(String username, String name, String email) {
+        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(this, DashboardActivity.class);
+        intent.putExtra("username", username);
+        intent.putExtra("name", name);
+        intent.putExtra("email", email);
+        startActivity(intent);
+        finish();
+    }
+
+    private void navigateToSignup() {
+        startActivity(new Intent(this, SignupActivity.class));
+    }
+
+    private void showDatabaseError(DatabaseError error) {
+        Toast.makeText(this, "Database error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+
+    // Simple User model class
+    private static class User {
+        public String username;
+        public String name;
+        public String email;
+        public String password;
     }
 }

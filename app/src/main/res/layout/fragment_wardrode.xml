@@ -1,18 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WardrobeFragment">
+    android:background="@android:color/white"
+    android:padding="16dp">
 
-    <!-- TODO: Update blank fragment layout -->
+    <!-- "My Closet" Title -->
     <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="My Closet"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/baseline_add_24"
+        android:contentDescription="Add item"
+        app:backgroundTint="@color/black"
+        app:tint="@android:color/white"/>
+
+    <!-- ScrollView to contain the wardrobe items -->
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Wardrobe"
-        android:gravity="center"
-        android:textSize="30sp"
-        android:textColor="@color/pink"
-        />
+        android:layout_below="@id/titleText"
+        android:layout_marginTop="16dp"
+        android:fillViewport="true">
 
-</FrameLayout>
+        <!-- Main container that will show either empty state or items -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Empty state container (visible when no items) -->
+            <LinearLayout
+                android:id="@+id/emptyStateContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="visible">
+
+                <!-- "YOUR CLOSET IS EMPTY" Text -->
+                <TextView
+                    android:id="@+id/emptyText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="YOUR CLOSET IS EMPTY"
+                    android:textSize="20sp"
+                    android:textColor="#666666"
+                    android:layout_marginTop="0dp"/>
+
+                <!-- "ADD SOMETHING TO START SWAPPING!" Text -->
+                <TextView
+                    android:id="@+id/addText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ADD SOMETHING TO START SWAPPING!"
+                    android:textSize="18sp"
+                    android:textColor="#666666"
+                    android:layout_marginTop="30dp"/>
+
+                <!-- Upload Icon -->
+                <ImageView
+                    android:id="@+id/uploadIcon"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/upload_icon"
+                    android:layout_marginTop="50dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Upload button"/>
+            </LinearLayout>
+
+            <!-- Items container (visible when items exist) -->
+            <LinearLayout
+                android:id="@+id/wardrobeContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"/>
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

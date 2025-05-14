@@ -8,6 +8,15 @@
     android:background="@drawable/img"
     tools:context=".MainActivity">
 
+    <!-- Added Fragment Container (placed above your buttons) -->
+
+    <FrameLayout
+        android:id="@+id/optionsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <!-- Your existing buttons (unchanged) -->
     <Button
         android:id="@+id/login_button_bt"
         android:layout_width="350dp"
@@ -35,8 +44,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

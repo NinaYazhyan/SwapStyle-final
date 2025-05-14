@@ -1,5 +1,5 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#FFD1DC" /> <!-- Dark Pastel Pink -->
+    <solid android:color="@color/black" /> <!-- Dark Pastel Pink -->
     <size android:width="100dp" android:height="100dp" /> <!-- Set the size of the circle -->
     <corners android:radius="50dp" /> <!-- Ensures the shape is a perfect circle -->
 </shape>

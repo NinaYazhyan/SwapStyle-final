@@ -1,64 +1,146 @@
 package com.example.signuploginrealtime;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link HomeFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class HomeFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final int FILTER_REQUEST_CODE = 1;
+    private RecyclerView recyclerView;
+    private WardrobeAdapter adapter;
+    private List<WardrobeItem> itemList;
+    private List<WardrobeItem> filteredItemList;
+    private DatabaseReference databaseRef;
+    private EditText searchEditText;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String selectedCategory = "";
+    private String selectedSubCategory = "";
+    private String selectedSize = "";
 
-    public HomeFragment() {
-        // Required empty public constructor
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_home, container, false);
+
+        // Initialize components
+        recyclerView = root.findViewById(R.id.wardrobeRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        itemList = new ArrayList<>();
+        filteredItemList = new ArrayList<>();
+        adapter = new WardrobeAdapter(getContext(), filteredItemList);
+        recyclerView.setAdapter(adapter);
+
+        databaseRef = FirebaseDatabase.getInstance().getReference("wardrobe");
+
+        // Initialize search
+        searchEditText = root.findViewById(R.id.searchEditText);
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                applyFiltersAndSearch();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // Set up Filter button click listener
+        Button btnFilter = root.findViewById(R.id.btnFilter);
+        btnFilter.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), FilterActivity.class);
+            startActivityForResult(intent, FILTER_REQUEST_CODE);
+        });
+
+        // Fetch data from Firebase
+        fetchDataFromFirebase();
+
+        return root;
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static HomeFragment newInstance(String param1, String param2) {
-        HomeFragment fragment = new HomeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    private void fetchDataFromFirebase() {
+        databaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                itemList.clear();
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    WardrobeItem item = data.getValue(WardrobeItem.class);
+                    if (item != null) {
+                        itemList.add(item);
+                    }
+                }
+                applyFiltersAndSearch();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getActivity(), "Failed to load items: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    private void applyFiltersAndSearch() {
+        filteredItemList.clear();
+        String searchQuery = searchEditText.getText().toString().toLowerCase().trim();
+
+        for (WardrobeItem item : itemList) {
+            boolean matchesCategory = selectedCategory.isEmpty() ||
+                    (item.getCategory() != null && item.getCategory().equalsIgnoreCase(selectedCategory));
+
+            boolean matchesSubCategory = selectedSubCategory.isEmpty() ||
+                    (item.getSubcategory() != null && item.getSubcategory().equalsIgnoreCase(selectedSubCategory));
+
+            boolean matchesSize = selectedSize.isEmpty() ||
+                    (item.getSize() != null && item.getSize().equalsIgnoreCase(selectedSize));
+
+            boolean matchesSearch = searchQuery.isEmpty() ||
+                    (item.getTitle() != null && item.getTitle().toLowerCase().contains(searchQuery)) ||
+                    (item.getDescription() != null && item.getDescription().toLowerCase().contains(searchQuery));
+
+            if (matchesCategory && matchesSubCategory && matchesSize && matchesSearch) {
+                filteredItemList.add(item);
+            }
         }
+
+        if (filteredItemList.isEmpty()) {
+            Toast.makeText(getActivity(), "No items match your filters", Toast.LENGTH_SHORT).show();
+        }
+
+        adapter.notifyDataSetChanged();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FILTER_REQUEST_CODE && resultCode == getActivity().RESULT_OK && data != null) {
+            selectedCategory = data.getStringExtra("category");
+            selectedSubCategory = data.getStringExtra("subCategory");
+            selectedSize = data.getStringExtra("size");
+
+            Toast.makeText(getActivity(), "Filters Applied:\nCategory: " + selectedCategory +
+                    "\nSubcategory: " + selectedSubCategory + "\nSize: " + selectedSize, Toast.LENGTH_LONG).show();
+            applyFiltersAndSearch();
+        }
     }
 }
