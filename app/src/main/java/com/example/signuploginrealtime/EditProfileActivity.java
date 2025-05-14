@@ -27,7 +27,7 @@ public class EditProfileActivity extends AppCompatActivity {
         editLocation = findViewById(R.id.editLocation);
         editEmail = findViewById(R.id.editEmail);
         editName = findViewById(R.id.editName);
-        editPassword = findViewById(R.id.editPpassword);
+        editPassword = findViewById(R.id.editPassword);
         saveButton = findViewById(R.id.saveButton);
 
         // Load user data from Intent
@@ -40,91 +40,74 @@ public class EditProfileActivity extends AppCompatActivity {
     private void showData() {
         Intent intent = getIntent();
         usernameUser = intent.getStringExtra("username");
+        String userId = intent.getStringExtra("userId");
 
-        if (usernameUser == null || usernameUser.isEmpty()) {
-            Toast.makeText(this, "Error: Username is missing", Toast.LENGTH_SHORT).show();
-            finish(); // Close the activity to prevent further errors
+        if (userId == null || userId.isEmpty()) {
+            Toast.makeText(this, "Error: User ID is missing", Toast.LENGTH_SHORT).show();
+            finish();
             return;
         }
 
-        // Initialize reference to this specific user's node
-        userRef = FirebaseDatabase.getInstance().getReference("users").child(usernameUser);
+        // Используем userId вместо username для ссылки на данные пользователя
+        userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
 
-        System.out.println("Username: " + usernameUser);
-        System.out.println("UserRef: " + userRef);
-
-        // Set current values to EditText fields
+        // Получаем данные из Intent
         locationUser = intent.getStringExtra("location") != null ? intent.getStringExtra("location") : "";
         emailUser = intent.getStringExtra("email") != null ? intent.getStringExtra("email") : "";
         nameUser = intent.getStringExtra("name") != null ? intent.getStringExtra("name") : "";
         passwordUser = intent.getStringExtra("password") != null ? intent.getStringExtra("password") : "";
 
+        // Заполняем поля
         editLocation.setText(locationUser);
         editEmail.setText(emailUser);
         editName.setText(nameUser);
         editPassword.setText(passwordUser);
     }
 
-    // Java
     private void updateProfile() {
         boolean changesMade = false;
 
-        // Trim the new input values for proper comparisons
+        // Получаем новые значения из полей ввода
         String newLocation = editLocation.getText().toString().trim();
         String newEmail = editEmail.getText().toString().trim();
         String newName = editName.getText().toString().trim();
         String newPassword = editPassword.getText().toString().trim();
 
+        // Обновляем местоположение, если оно изменилось
         if (!newLocation.equals(locationUser)) {
-            userRef.child("location").setValue(newLocation).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(this, "Location updated", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Failed to update location", Toast.LENGTH_SHORT).show();
-                }
-            });
+            userRef.child("location").setValue(newLocation);
             locationUser = newLocation;
             changesMade = true;
         }
 
+        // Обновляем email, если он изменился
         if (!newEmail.equals(emailUser)) {
-            userRef.child("email").setValue(newEmail).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(this, "Email updated", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Failed to update email", Toast.LENGTH_SHORT).show();
-                }
-            });
+            userRef.child("email").setValue(newEmail);
             emailUser = newEmail;
             changesMade = true;
         }
 
+        // Обновляем имя, если оно изменилось
         if (!newName.equals(nameUser)) {
-            userRef.child("name").setValue(newName).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(this, "Name updated", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Failed to update name", Toast.LENGTH_SHORT).show();
-                }
-            });
+            userRef.child("name").setValue(newName);
             nameUser = newName;
             changesMade = true;
         }
 
+        // Обновляем пароль, если он изменился
         if (!newPassword.equals(passwordUser)) {
-            userRef.child("password").setValue(newPassword).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(this, "Password updated", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Failed to update password", Toast.LENGTH_SHORT).show();
-                }
-            });
+            userRef.child("password").setValue(newPassword);
             passwordUser = newPassword;
             changesMade = true;
         }
 
+        // Уведомляем пользователя о результате
         if (changesMade) {
-            Toast.makeText(this, "Profile update initiated", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Profile successfully updated", Toast.LENGTH_SHORT).show();
+            // Обновляем имя пользователя, если оно изменилось
+            if (!newName.equals(nameUser)) {
+                userRef.child("username").setValue(usernameUser);
+            }
             finish();
         } else {
             Toast.makeText(this, "No changes detected", Toast.LENGTH_SHORT).show();
