@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions -->
+    <!-- Permissions (Unchanged) -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -16,12 +16,12 @@
         android:maxSdkVersion="28"
         tools:ignore="ScopedStorage" />
 
-    <!-- Hardware Features -->
+    <!-- Hardware Features (Unchanged) -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <!-- Queries for package visibility -->
+    <!-- Queries (Unchanged) -->
     <queries>
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
@@ -49,45 +49,7 @@
         android:theme="@style/Theme.SignupLoginRealtime"
         tools:targetApi="34">
 
-        <!-- 🔹 CHAT ACTIVITY (Already present - kept intact) -->
-        <activity
-            android:name=".ChatActivity"
-            android:exported="false" />
-
-        <!-- 🔹 (OPTIONAL) ChatFragment is part of MainActivity, so not needed separately -->
-
-        <!-- 🔹 (OPTIONAL) Firebase Messaging Service: add only if you want push notifications later -->
-        <!--
-        <service
-            android:name=".MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-        -->
-
-        <!-- Firebase Services Configuration -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="default_channel" />
-        <meta-data
-            android:name="com.google.firebase.auth.api_key"
-            android:value="@string/default_web_client_id" />
-        <meta-data
-            android:name="firebase_database_url"
-            android:value="@string/firebase_database_url" />
-        <meta-data
-            android:name="firebase_storage_bucket"
-            android:value="@string/storage_bucket" />
-        <meta-data
-            android:name="firebase_auto_init"
-            android:value="true" />
-        <meta-data
-            android:name="firebase_auth_persistence"
-            android:value="local" />
-
-        <!-- Activities -->
+        <!-- Existing Activities (Unchanged) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -128,7 +90,20 @@
             android:name=".FilterActivity"
             android:exported="false" />
 
-        <!-- FileProvider Configuration -->
+        <!-- Chat-Related Activities (Added) -->
+        <activity
+            android:name=".UserSearchActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize|stateVisible" />
+        <activity
+            android:name=".ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize|stateVisible" />
+        <activity
+            android:name=".ChatProfileActivity"
+            android:exported="false" />
+
+        <!-- Existing Providers and Services (Unchanged) -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -138,8 +113,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <!-- Firebase Components -->
         <service
             android:name="com.google.firebase.components.ComponentDiscoveryService"
             android:exported="false">
@@ -147,7 +120,25 @@
                 android:name="com.google.firebase.components:com.google.firebase.storage.StorageRegistrar"
                 android:value="com.google.firebase.components.ComponentRegistrar" />
         </service>
+
+        <!-- Firebase Config (Unchanged) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="default_channel" />
+        <meta-data
+            android:name="com.google.firebase.auth.api_key"
+            android:value="@string/default_web_client_id" />
+        <meta-data
+            android:name="firebase_database_url"
+            android:value="@string/firebase_database_url" />
+        <meta-data
+            android:name="firebase_storage_bucket"
+            android:value="@string/storage_bucket" />
+        <meta-data
+            android:name="firebase_auto_init"
+            android:value="true" />
+        <meta-data
+            android:name="firebase_auth_persistence"
+            android:value="local" />
     </application>
-
 </manifest>
-

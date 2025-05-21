@@ -9,7 +9,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="lavender">#8692F7</color>
     <color name="soft_beige">#F4EADE</color>
-    <color name="rating_bar">#FFC107</color> <!-- Example amber color -->
+    <color name="rating_bar">#FFC107</color>
+    <color name="colorPrimary">#6200EE</color><!-- Example amber color -->
 
     <color name="pink">#7B58A6</color>
 </resources>

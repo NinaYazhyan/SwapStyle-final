@@ -1,5 +1,6 @@
 package com.example.signuploginrealtime;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,13 +15,14 @@ import com.google.android.material.navigation.NavigationView;
 public class DashboardActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private BottomNavigationView bottomNavigationView;
-    private String username, name, email, password, location;
+    private String username, name, email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment);
 
+        // Initialize user data
         username = getIntent().getStringExtra("username");
         name = getIntent().getStringExtra("name");
         email = getIntent().getStringExtra("email");
@@ -30,6 +32,7 @@ public class DashboardActivity extends AppCompatActivity {
         setupDrawer();
         setupBottomNavigation();
 
+        // Load default fragment
         if (savedInstanceState == null) {
             replaceFragment(new HomeFragment());
         }
@@ -38,6 +41,7 @@ public class DashboardActivity extends AppCompatActivity {
     private void initializeViews() {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         drawerLayout = findViewById(R.id.drawer_layout);
+
         NavigationView navigationView = findViewById(R.id.nav_view);
         if (navigationView != null) {
             navigationView.setCheckedItem(R.id.nav_home);
@@ -48,6 +52,9 @@ public class DashboardActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("SwapSytle");
+            }
         }
     }
 
@@ -64,16 +71,21 @@ public class DashboardActivity extends AppCompatActivity {
             bottomNavigationView.setBackground(null);
             bottomNavigationView.setOnItemSelectedListener(item -> {
                 int itemId = item.getItemId();
+                Fragment selectedFragment = null;
+
                 if (itemId == R.id.home) {
-                    replaceFragment(new HomeFragment());
+                    selectedFragment = new HomeFragment();
                 } else if (itemId == R.id.wardrobe) {
-                    replaceFragment(new WardrobeFragment());
+                    selectedFragment = new WardrobeFragment();
                 } else if (itemId == R.id.chat) {
-                    replaceFragment(new ChatFragment());
+                    // Directly load ChatFragment without authentication check
+                    selectedFragment = new ChatFragment();
                 } else if (itemId == R.id.profile) {
-                    // Instead of launching EditProfileActivity immediately,
-                    // we load the ProfileFragment
-                    replaceFragment(ProfileFragment.newInstance(username, name, email));
+                    selectedFragment = ProfileFragment.newInstance(username, name, email);
+                }
+
+                if (selectedFragment != null) {
+                    replaceFragment(selectedFragment);
                 }
                 return true;
             });
@@ -85,5 +97,15 @@ public class DashboardActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_lay, fragment);
         fragmentTransaction.commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handle back press with drawer close if open
+        if (drawerLayout.isDrawerOpen(findViewById(R.id.nav_view))) {
+            drawerLayout.closeDrawer(findViewById(R.id.nav_view));
+        } else {
+            super.onBackPressed();
+        }
     }
 }

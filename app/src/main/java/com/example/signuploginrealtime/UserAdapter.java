@@ -1,57 +1,62 @@
 package com.example.signuploginrealtime;
 
-import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
-    private Context context;
-    private List<User> users;
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
+    private List<User> userList;
+    private OnUserClickListener listener;
 
-    public UserAdapter(Context context, List<User> users) {
-        this.context = context;
-        this.users = users;
+    public interface OnUserClickListener {
+        void onUserClick(User user);
+    }
+
+    public UserAdapter(List<User> userList, OnUserClickListener listener) {
+        this.userList = userList;
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_user, parent, false);
-        return new ViewHolder(view);
+    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user, parent, false);
+        return new UserViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        User user = users.get(position);
-        holder.username.setText(user.username);
+    public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
+        User user = userList.get(position);
+        holder.userNameTextView.setText(user.getUsername());
 
+        // Make the entire item clickable
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ChatActivity.class);
-            intent.putExtra("receiverId", user.uid);
-            intent.putExtra("receiverName", user.username);
-            context.startActivity(intent);
+            if (listener != null) {
+                listener.onUserClick(user);
+            }
         });
     }
 
     @Override
     public int getItemCount() {
-        return users.size();
+        return userList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView username;
+    // Update the list with new data
+    public void updateList(List<User> newList) {
+        this.userList.clear();
+        this.userList.addAll(newList);
+        notifyDataSetChanged();
+    }
 
-        public ViewHolder(View itemView) {
+    static class UserViewHolder extends RecyclerView.ViewHolder {
+        TextView userNameTextView;
+
+        public UserViewHolder(@NonNull View itemView) {
             super(itemView);
-            username = itemView.findViewById(R.id.username_text);
-        }
-    }
-}
+            userNameTextView = itemView.findViewById(R.id.user_name);
+        }}}

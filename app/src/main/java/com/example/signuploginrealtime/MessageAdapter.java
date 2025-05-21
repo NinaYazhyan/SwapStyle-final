@@ -8,36 +8,54 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
-    private List<ChatMessage> messages;
-    private static final int MSG_TYPE_LEFT = 0;
-    private static final int MSG_TYPE_RIGHT = 1;
+public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-    public MessageAdapter(List<ChatMessage> messages) {
+    private static final int VIEW_TYPE_SENT = 1;
+    private static final int VIEW_TYPE_RECEIVED = 2;
+
+    private final List<Message> messages;
+    private final String currentUserId;
+
+    public MessageAdapter(List<Message> messages, String currentUserId) {
         this.messages = messages;
+        this.currentUserId = currentUserId;
     }
 
     @Override
     public int getItemViewType(int position) {
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        return messages.get(position).senderId.equals(currentUserId) ? MSG_TYPE_RIGHT : MSG_TYPE_LEFT;
+        Message message = messages.get(position);
+        if (message.getSenderId().equals(currentUserId)) {
+            return VIEW_TYPE_SENT;
+        } else {
+            return VIEW_TYPE_RECEIVED;
+        }
     }
 
     @NonNull
     @Override
-    public MessageAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        int layout = (viewType == MSG_TYPE_RIGHT) ? R.layout.chat_item_right : R.layout.chat_item_left;
-        View view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
-        return new ViewHolder(view);
+    public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view;
+        if (viewType == VIEW_TYPE_SENT) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_sent, parent, false);
+        } else {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_received, parent, false);
+        }
+        return new MessageViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, int position) {
-        holder.message.setText(messages.get(position).message);
+    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+        Message message = messages.get(position);
+        holder.messageText.setText(message.getMessageText());
+
+        String formattedTime = new SimpleDateFormat("hh:mm a", Locale.getDefault())
+                .format(new Date(message.getTimestamp()));
+        holder.timestamp.setText(formattedTime);
     }
 
     @Override
@@ -45,11 +63,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         return messages.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView message;
-        public ViewHolder(View itemView) {
+    static class MessageViewHolder extends RecyclerView.ViewHolder {
+        TextView messageText;
+        TextView timestamp;
+
+        public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
-            message = itemView.findViewById(R.id.text_message);
+            messageText = itemView.findViewById(R.id.message_text);
+            timestamp = itemView.findViewById(R.id.timestamp);
         }
     }
 }

@@ -3,51 +3,51 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/drawer_layout"
     android:fitsSystemWindows="true"
-    tools:openDrawer="start"
-    tools:context=".DashboardActivity">
+    tools:context=".DashboardActivity"
+    tools:openDrawer="start">
 
+    <!-- Main Content Area -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
             android:id="@+id/toolbar"
-            android:elevation="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
             android:background="@color/pink"
+            android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             android:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
+        <!-- Fragment Container -->
         <FrameLayout
+            android:id="@+id/frame_lay"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/frame_lay"/>
-
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
     </LinearLayout>
 
+    <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/nav_view"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/nav_menu"
         app:itemIconTint="@color/pink"
         app:itemTextColor="@color/pink"/>
 
-
+    <!-- Bottom App Bar with Navigation -->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-
 
         <com.google.android.material.bottomappbar.BottomAppBar
             android:id="@+id/bottomAppBar"
@@ -69,7 +69,14 @@
 
         </com.google.android.material.bottomappbar.BottomAppBar>
 
-
+        <!-- Optional: Add Floating Action Button if needed -->
+        <!-- <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            app:layout_anchor="@id/bottomAppBar"/> -->
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
