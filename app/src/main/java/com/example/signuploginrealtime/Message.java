@@ -1,23 +1,50 @@
 package com.example.signuploginrealtime;
 
 public class Message {
+    private String messageId;
     private String senderId;
-    private String receiverId;
-    private String messageText;
+    private String content;
     private long timestamp;
 
-    public Message() {}
+    public Message() {
+        // Пустой конструктор для Firebase
+    }
 
-    public Message(String senderId, String receiverId, String messageText, long timestamp) {
+    public Message(String senderId, String content, long timestamp) {
         this.senderId = senderId;
-        this.receiverId = receiverId;
-        this.messageText = messageText;
+        this.content = content;
         this.timestamp = timestamp;
     }
 
-    // Getters
-    public String getSenderId() { return senderId; }
-    public String getReceiverId() { return receiverId; }
-    public String getMessageText() { return messageText; }
-    public long getTimestamp() { return timestamp; }
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 }

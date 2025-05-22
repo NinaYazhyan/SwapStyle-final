@@ -63,10 +63,19 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
                 .centerCrop()
                 .into(holder.imageView);
 
+
+
+        holder.messageButton.setOnClickListener(v -> {
+            if (messageListener != null) {
+                messageListener.onMessageClick(item);
+            }
+        });
         holder.titleTextView.setText(item.getTitle());
         holder.descriptionTextView.setText(item.getDescription());
         holder.categoryTextView.setText(item.getCategory() + " - " + item.getSubcategory());
         holder.sizeTextView.setText("Размер: " + item.getSize());
+
+
 
         // Set user name
         if (item.getUserName() != null && !item.getUserName().isEmpty()) {

@@ -51,7 +51,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Message message = messages.get(position);
-        holder.messageText.setText(message.getMessageText());
+        holder.messageText.setText(message.getContent());
 
         String formattedTime = new SimpleDateFormat("hh:mm a", Locale.getDefault())
                 .format(new Date(message.getTimestamp()));

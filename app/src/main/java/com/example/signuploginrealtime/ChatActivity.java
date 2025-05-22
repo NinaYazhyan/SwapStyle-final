@@ -23,27 +23,36 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
 
-    private String userId;
-    private String userName;
+    private static final String EXTRA_USER_ID = "userId";
+    private static final String EXTRA_USER_NAME = "userName";
+
+    private RecyclerView recyclerViewMessages;
+    private EditText messageEditText;
+    private ImageButton sendButton;
+    private ImageButton backButton;
+    private TextView usernameTextView;
+
+    private MessageAdapter messageAdapter;
+    private List<Message> messageList;
+
     private String currentUserId;
+    private String chatUserId;
+    private String chatUserName;
     private String currentUserName;
 
-    private RecyclerView recyclerView;
-    private MessageAdapter adapter;
-    private List<Message> messageList;
-    private EditText messageEditText;
     private DatabaseReference messagesRef;
     private DatabaseReference recentChatsRef;
 
     public static void start(Context context, String userId, String userName) {
         Intent intent = new Intent(context, ChatActivity.class);
-        intent.putExtra("userId", userId);
-        intent.putExtra("userName", userName);
+        intent.putExtra(EXTRA_USER_ID, userId);
+        intent.putExtra(EXTRA_USER_NAME, userName);
         context.startActivity(intent);
     }
 
@@ -52,65 +61,80 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // Get data from intent
-        userId = getIntent().getStringExtra("userId");
-        userName = getIntent().getStringExtra("userName");
-
-        // Get current user info
+        // Проверка авторизации
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
-            Toast.makeText(this, "You must be logged in to chat", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Необходимо войти в систему", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
+
         currentUserId = currentUser.getUid();
+
+        // Получение данных собеседника
+        chatUserId = getIntent().getStringExtra(EXTRA_USER_ID);
+        chatUserName = getIntent().getStringExtra(EXTRA_USER_NAME);
+
+        if (chatUserId == null || chatUserName == null) {
+            Toast.makeText(this, "Ошибка: данные пользователя отсутствуют", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // Инициализация Firebase
+        String chatId = getChatId(currentUserId, chatUserId);
+        messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(chatId);
+        recentChatsRef = FirebaseDatabase.getInstance().getReference("recent_chats");
+
+        // Инициализация UI
+        initUI();
+
+        // Получение имени текущего пользователя
         getCurrentUserName();
 
-        // Initialize Firebase references
-        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference();
-        messagesRef = databaseRef.child("messages");
-        recentChatsRef = databaseRef.child("recent_chats");
-
-        // Set up UI
-        TextView userNameTextView = findViewById(R.id.user_name);
-        userNameTextView.setText(userName);
-
-        ImageButton backButton = findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> finish());
-
-        // Set up RecyclerView
-        recyclerView = findViewById(R.id.recycler_view_messages);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        messageList = new ArrayList<>();
-        adapter = new MessageAdapter(messageList, currentUserId);
-        recyclerView.setAdapter(adapter);
-
-        // Set up message input
-        messageEditText = findViewById(R.id.message_edit_text);
-        ImageButton sendButton = findViewById(R.id.send_button);
-        sendButton.setOnClickListener(v -> sendMessage());
-
-        // Load messages
+        // Загрузка сообщений
         loadMessages();
     }
 
-    private void getCurrentUserName() {
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId);
-        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists() && snapshot.child("username").exists()) {
-                    currentUserName = snapshot.child("username").getValue(String.class);
-                } else {
-                    currentUserName = "Unknown User";
-                }
-            }
+    private void initUI() {
+        recyclerViewMessages = findViewById(R.id.recycler_view_messages);
+        messageEditText = findViewById(R.id.message_edit_text);
+        sendButton = findViewById(R.id.send_button);
+        backButton = findViewById(R.id.back_button);
+        usernameTextView = findViewById(R.id.user_name);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                currentUserName = "Unknown User";
-            }
-        });
+        usernameTextView.setText(chatUserName);
+
+        messageList = new ArrayList<>();
+        messageAdapter = new MessageAdapter(messageList, currentUserId);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setStackFromEnd(true);
+        recyclerViewMessages.setLayoutManager(layoutManager);
+        recyclerViewMessages.setAdapter(messageAdapter);
+
+        sendButton.setOnClickListener(v -> sendMessage());
+        backButton.setOnClickListener(v -> finish());
+    }
+
+    private void getCurrentUserName() {
+        FirebaseDatabase.getInstance().getReference("users").child(currentUserId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists() && snapshot.hasChild("username")) {
+                            currentUserName = snapshot.child("username").getValue(String.class);
+                        } else {
+                            currentUserName = "Пользователь";
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        currentUserName = "Пользователь";
+                    }
+                });
     }
 
     private void loadMessages() {
@@ -118,64 +142,61 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 messageList.clear();
-
                 for (DataSnapshot messageSnapshot : snapshot.getChildren()) {
                     Message message = messageSnapshot.getValue(Message.class);
-                    if (message != null &&
-                            ((message.getSenderId().equals(currentUserId) && message.getReceiverId().equals(userId)) ||
-                                    (message.getSenderId().equals(userId) && message.getReceiverId().equals(currentUserId)))) {
+                    if (message != null) {
+                        message.setMessageId(messageSnapshot.getKey());
                         messageList.add(message);
                     }
                 }
-
-                // Sort messages by timestamp
-                Collections.sort(messageList, (m1, m2) ->
-                        Long.compare(m1.getTimestamp(), m2.getTimestamp()));
-
-                adapter.notifyDataSetChanged();
-
-                // Scroll to bottom
+                messageAdapter.notifyDataSetChanged();
                 if (messageList.size() > 0) {
-                    recyclerView.smoothScrollToPosition(messageList.size() - 1);
+                    recyclerViewMessages.smoothScrollToPosition(messageList.size() - 1);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(ChatActivity.this, "Failed to load messages", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, "Ошибка загрузки сообщений", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void sendMessage() {
-        String messageText = messageEditText.getText().toString().trim();
-        if (messageText.isEmpty()) {
+        String content = messageEditText.getText().toString().trim();
+        if (content.isEmpty()) {
             return;
         }
 
         long timestamp = System.currentTimeMillis();
-        Message message = new Message(currentUserId, userId, messageText, timestamp);
+        Message message = new Message(currentUserId, content, timestamp);
 
-        // Add message to Firebase
+        // Сохранение сообщения
         String messageId = messagesRef.push().getKey();
         if (messageId != null) {
             messagesRef.child(messageId).setValue(message)
                     .addOnSuccessListener(aVoid -> {
                         messageEditText.setText("");
-                        updateRecentChats(messageText, timestamp);
+                        updateRecentChats(content, timestamp);
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(ChatActivity.this, "Failed to send message", Toast.LENGTH_SHORT).show());
+                            Toast.makeText(ChatActivity.this, "Ошибка отправки: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                    );
         }
     }
 
-    private void updateRecentChats(String messageText, long timestamp) {
-        // Update for current user
-        RecentChat myRecentChat = new RecentChat(userId, userName, messageText, timestamp);
-        recentChatsRef.child(currentUserId).child(userId).setValue(myRecentChat);
+    private void updateRecentChats(String lastMessage, long timestamp) {
+        // Обновление для текущего пользователя
+        RecentChat myRecentChat = new RecentChat(chatUserId, chatUserName, lastMessage, timestamp);
+        recentChatsRef.child(currentUserId).child(chatUserId).setValue(myRecentChat);
 
-        // Update for other user
-        RecentChat theirRecentChat = new RecentChat(currentUserId, currentUserName, messageText, timestamp);
-        recentChatsRef.child(userId).child(currentUserId).setValue(theirRecentChat);
+        // Обновление для собеседника
+        RecentChat theirRecentChat = new RecentChat(currentUserId, currentUserName, lastMessage, timestamp);
+        recentChatsRef.child(chatUserId).child(currentUserId).setValue(theirRecentChat);
+    }
+
+    private String getChatId(String userId1, String userId2) {
+        // Создаем уникальный ID чата, сортируя ID пользователей
+        return userId1.compareTo(userId2) < 0 ? userId1 + "_" + userId2 : userId2 + "_" + userId1;
     }
 }

@@ -2,6 +2,7 @@ package com.example.signuploginrealtime;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -39,6 +40,11 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(v -> attemptLogin());
         signupRedirectText.setOnClickListener(v -> navigateToSignup());
+
+
+        Log.d("AuthDebug", "Текущий пользователь: " +
+                (FirebaseAuth.getInstance().getCurrentUser() != null ?
+                        FirebaseAuth.getInstance().getCurrentUser().getUid() : "не авторизован"));
     }
 
     private void attemptLogin() {
@@ -67,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void authenticateUser(String username, String password) {
+        // First query to find the user's email by username
         Query userQuery = databaseReference.orderByChild("username").equalTo(username);
 
         userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -80,14 +87,15 @@ public class LoginActivity extends AppCompatActivity {
 
                 for (DataSnapshot userSnapshot : snapshot.getChildren()) {
                     User user = userSnapshot.getValue(User.class);
-                    if (user != null && user.password.equals(password)) {
-                        handleSuccessfulLogin(username, user.name, user.email);
+                    if (user != null && user.email != null) {
+                        // Now use Firebase Authentication with the email
+                        loginWithFirebaseAuth(user.email, password, user);
                         return;
                     }
                 }
 
-                loginPassword.setError("Invalid password");
-                loginPassword.requestFocus();
+                loginUsername.setError("Invalid user data");
+                loginUsername.requestFocus();
             }
 
             @Override
@@ -95,6 +103,20 @@ public class LoginActivity extends AppCompatActivity {
                 showDatabaseError(error);
             }
         });
+    }
+
+    private void loginWithFirebaseAuth(String email, String password, User user) {
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("AuthDebug", "signInWithEmail:success");
+                        handleSuccessfulLogin(user.username, user.name, user.email);
+                    } else {
+                        Log.w("AuthDebug", "signInWithEmail:failure", task.getException());
+                        loginPassword.setError("Authentication failed");
+                        loginPassword.requestFocus();
+                    }
+                });
     }
 
     private void handleSuccessfulLogin(String username, String name, String email) {

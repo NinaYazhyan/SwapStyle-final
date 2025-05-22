@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -71,6 +72,7 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+
     private void loadWardrobeItems() {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -106,8 +108,12 @@ public class HomeFragment extends Fragment {
     }
 
     private void startChatWithUser(WardrobeItem item) {
-        if (item.getUserId() != null) {
-            ChatActivity.start(requireContext(), item.getUserId(), item.getUserName());
+        // Check if user is trying to message themselves
+        if (item.getUserId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+            Toast.makeText(getContext(), "You cannot message yourself", Toast.LENGTH_SHORT).show();
+        } else {
+            // Start ChatActivity with the recipient's user ID and username
+            ChatActivity.start(getContext(), item.getUserId(), item.getUserName());
         }
     }
 
