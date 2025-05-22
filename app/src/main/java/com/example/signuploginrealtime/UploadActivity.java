@@ -258,7 +258,7 @@ public class UploadActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 String userName = "Неизвестный пользователь";
                 if (snapshot.exists() && snapshot.child("name").exists()) {
-                    userName = snapshot.child("name").getValue(String.class);
+                    userName = snapshot.child("username").getValue(String.class);
                 }
 
                 WardrobeItem item = new WardrobeItem();
