@@ -44,6 +44,15 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/wardrobeUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Uploaded by: User"
+            android:textSize="16sp"
+            android:textColor="#555555"
+            android:paddingTop="4dp" />
+
+        <TextView
             android:id="@+id/wardrobeCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -68,5 +77,14 @@
             android:paddingTop="8dp"
             android:textSize="16sp"
             android:lineSpacingMultiplier="1.2" />
+
+        <Button
+            android:id="@+id/buttonMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Отправить сообщение"
+            android:backgroundTint="@color/pink"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="8dp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

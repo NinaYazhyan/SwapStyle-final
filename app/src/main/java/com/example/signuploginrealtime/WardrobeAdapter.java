@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,25 +15,34 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
 
     private Context context;
     private List<WardrobeItem> itemList;
+    private OnMessageClickListener messageListener;
 
-    public WardrobeAdapter(Context context, List<WardrobeItem> itemList) {
+    public interface OnMessageClickListener {
+        void onMessageClick(WardrobeItem item);
+    }
+
+    public WardrobeAdapter(Context context, List<WardrobeItem> itemList, OnMessageClickListener listener) {
         this.context = context;
         this.itemList = itemList;
+        this.messageListener = listener;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView, toggleIcon;
-        TextView titleTextView, descriptionTextView;
+        TextView titleTextView, descriptionTextView, userNameTextView;
         TextView categoryTextView, sizeTextView;
+        Button messageButton;
 
         public ViewHolder(View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.wardrobeImage);
             titleTextView = itemView.findViewById(R.id.wardrobeTitle);
             descriptionTextView = itemView.findViewById(R.id.wardrobeDescription);
+            userNameTextView = itemView.findViewById(R.id.wardrobeUserName);
             toggleIcon = itemView.findViewById(R.id.toggleIcon);
             categoryTextView = itemView.findViewById(R.id.wardrobeCategory);
             sizeTextView = itemView.findViewById(R.id.wardrobeSize);
+            messageButton = itemView.findViewById(R.id.buttonMessage);
         }
     }
 
@@ -56,7 +66,14 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
         holder.titleTextView.setText(item.getTitle());
         holder.descriptionTextView.setText(item.getDescription());
         holder.categoryTextView.setText(item.getCategory() + " - " + item.getSubcategory());
-        holder.sizeTextView.setText("Size: " + item.getSize());
+        holder.sizeTextView.setText("Размер: " + item.getSize());
+
+        // Set user name
+        if (item.getUserName() != null && !item.getUserName().isEmpty()) {
+            holder.userNameTextView.setText("Владелец: " + item.getUserName());
+        } else {
+            holder.userNameTextView.setText("Владелец: Неизвестно");
+        }
 
         // Initially hide the description
         holder.descriptionTextView.setVisibility(View.GONE);
@@ -70,6 +87,13 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
             } else {
                 holder.descriptionTextView.setVisibility(View.VISIBLE);
                 holder.toggleIcon.setImageResource(R.drawable.baseline_visibility_24);
+            }
+        });
+
+        // Set message button click listener
+        holder.messageButton.setOnClickListener(v -> {
+            if (messageListener != null) {
+                messageListener.onMessageClick(item);
             }
         });
     }

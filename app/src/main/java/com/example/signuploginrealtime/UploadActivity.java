@@ -30,8 +30,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -240,6 +243,7 @@ public class UploadActivity extends AppCompatActivity {
         }
     }
 
+    // В методе saveItemToDatabase() класса UploadActivity.java добавьте следующий код
     private void saveItemToDatabase(String imageUrl) {
         String title = inputTitle.getText().toString().trim();
         String description = inputDescription.getText().toString().trim();
@@ -247,34 +251,52 @@ public class UploadActivity extends AppCompatActivity {
         String subcategory = spinnerSubcategory.getSelectedItem().toString();
         String size = ((RadioButton)findViewById(sizeGroup.getCheckedRadioButtonId())).getText().toString();
 
-        WardrobeItem item = new WardrobeItem();
-        item.setTitle(title);
-        item.setDescription(description);
-        item.setCategory(category);
-        item.setSubcategory(subcategory);
-        item.setSize(size);
-        item.setImageUrl(imageUrl);
-        item.setUserId(currentUser.getUid());
+        // Получаем имя текущего пользователя
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUser.getUid());
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String userName = "Неизвестный пользователь";
+                if (snapshot.exists() && snapshot.child("name").exists()) {
+                    userName = snapshot.child("name").getValue(String.class);
+                }
 
-        if (isEditMode) {
-            wardrobeRef.child(itemId).setValue(item)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Item updated", Toast.LENGTH_SHORT).show();
-                        finish();
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show());
-        } else {
-            String newItemId = wardrobeRef.push().getKey();
-            item.setId(newItemId);
-            wardrobeRef.child(newItemId).setValue(item)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Item added", Toast.LENGTH_SHORT).show();
-                        finish();
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(this, "Failed to add item", Toast.LENGTH_SHORT).show());
-        }
+                WardrobeItem item = new WardrobeItem();
+                item.setTitle(title);
+                item.setDescription(description);
+                item.setCategory(category);
+                item.setSubcategory(subcategory);
+                item.setSize(size);
+                item.setImageUrl(imageUrl);
+                item.setUserId(currentUser.getUid());
+                item.setUserName(userName);
+
+                if (isEditMode) {
+                    wardrobeRef.child(itemId).setValue(item)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(UploadActivity.this, "Предмет обновлен", Toast.LENGTH_SHORT).show();
+                                finish();
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(UploadActivity.this, "Ошибка обновления", Toast.LENGTH_SHORT).show());
+                } else {
+                    String newItemId = wardrobeRef.push().getKey();
+                    item.setId(newItemId);
+                    wardrobeRef.child(newItemId).setValue(item)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(UploadActivity.this, "Предмет добавлен", Toast.LENGTH_SHORT).show();
+                                finish();
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(UploadActivity.this, "Ошибка добавления предмета", Toast.LENGTH_SHORT).show());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(UploadActivity.this, "Ошибка получения данных пользователя", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void populateFields() {
