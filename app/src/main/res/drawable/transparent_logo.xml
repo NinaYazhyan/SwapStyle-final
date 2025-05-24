@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap
+            android:src="@drawable/img_7"
+            android:tint="@color/pink"
+            android:tintMode="src_atop" />
+    </item>
+</layer-list>

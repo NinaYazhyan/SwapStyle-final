@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/img_8">>
 
     <TextView
         android:id="@+id/chat_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Сообщения"
+        android:text="Messages"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
@@ -25,18 +26,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="У вас пока нет сообщений"
+        android:text="No Messages Yet"
         android:textSize="18sp"
         android:visibility="gone"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_new_chat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="79dp"
+        android:layout_height="83dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="9dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="5dp"
         android:src="@drawable/baseline_chat_24"
-        app:backgroundTint="@color/pink"/>
+        app:backgroundTint="@color/pink" />
 
 </RelativeLayout>

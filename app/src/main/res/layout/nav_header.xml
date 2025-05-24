@@ -6,12 +6,12 @@
     android:layout_height="176dp"
     android:gravity="bottom"
     android:padding="16dp"
-    android:background="@drawable/img_1"
+    android:background="@color/pink"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
         android:layout_width="95dp"
-        android:layout_height="81dp"
+        android:layout_height="82dp"
         android:src="@drawable/img_4" />
 
     <TextView
@@ -21,12 +21,5 @@
         android:textColor="@color/white"
         android:textStyle="bold"/>
 
-    <TextView
-        android:layout_width="189dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="contact@androidknowledge.com"
-        android:textColor="@color/white"
-        android:textSize="14sp" />
 
 </LinearLayout>

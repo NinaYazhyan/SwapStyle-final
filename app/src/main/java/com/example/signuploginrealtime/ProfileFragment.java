@@ -1,5 +1,6 @@
 package com.example.signuploginrealtime;
 
+
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+
 public class ProfileFragment extends Fragment {
     private String username, name, email, password, location;
     private DatabaseReference userRef;
@@ -47,9 +49,11 @@ public class ProfileFragment extends Fragment {
     private StorageReference storageRef;
     private String userId;
 
+
     public ProfileFragment() {
         // Required empty public constructor
     }
+
 
     public static ProfileFragment newInstance(String username, String name, String email) {
         ProfileFragment fragment = new ProfileFragment();
@@ -61,6 +65,7 @@ public class ProfileFragment extends Fragment {
         return fragment;
     }
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -68,16 +73,19 @@ public class ProfileFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_profile2, container, false);
 
+
         if (getArguments() != null) {
             username = getArguments().getString("username");
             name = getArguments().getString("name");
             email = getArguments().getString("email");
         }
 
+
         TextView profileName = rootView.findViewById(R.id.profileName);
         TextView profileEmail = rootView.findViewById(R.id.profileEmail);
         profileName.setText(name);
         profileEmail.setText(email);
+
 
         // Initialize profile picture views
         profileIcon = rootView.findViewById(R.id.profileIcon);
@@ -85,11 +93,13 @@ public class ProfileFragment extends Fragment {
         storageRef = FirebaseStorage.getInstance().getReference("profile_pictures");
         initializeLaunchers();
 
+
         // Initialize buttons
         Button buttonEditProfile = rootView.findViewById(R.id.editProfile);
         Button buttonDeleteAccount = rootView.findViewById(R.id.deleteAccount);
         Button buttonRateUs = rootView.findViewById(R.id.rateUs);
         Button buttonSupport = rootView.findViewById(R.id.support);
+
 
         // Set click listeners
         buttonEditProfile.setOnClickListener(v -> fetchUserDataAndLaunchEdit());
@@ -98,8 +108,10 @@ public class ProfileFragment extends Fragment {
         buttonDeleteAccount.setOnClickListener(v -> showDeleteAccountDialog());
         addProfilePicButton.setOnClickListener(v -> showImagePickerDialog());
 
+
         return rootView;
     }
+
 
     private void initializeLaunchers() {
         cameraLauncher = registerForActivityResult(
@@ -112,6 +124,7 @@ public class ProfileFragment extends Fragment {
                         uploadImageToFirebase(imageBitmap);
                     }
                 });
+
 
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
@@ -129,6 +142,7 @@ public class ProfileFragment extends Fragment {
                     }
                 });
     }
+
 
     private void showImagePickerDialog() {
         new AlertDialog.Builder(requireContext())
@@ -151,6 +165,7 @@ public class ProfileFragment extends Fragment {
                 .show();
     }
 
+
     private void launchCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
@@ -158,16 +173,19 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+
     private void uploadImageToFirebase(Bitmap bitmap) {
         if (userId == null) {
             fetchUserDataAndUploadImage(bitmap);
             return;
         }
 
+
         StorageReference profileImageRef = storageRef.child(userId + ".jpg");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
+
 
         UploadTask uploadTask = profileImageRef.putBytes(data);
         uploadTask.addOnSuccessListener(taskSnapshot -> {
@@ -180,6 +198,7 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(getContext(), "Failed to upload image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
     }
+
 
     private void fetchUserDataAndUploadImage(Bitmap bitmap) {
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
@@ -196,6 +215,7 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(getContext(), "User data not found", Toast.LENGTH_SHORT).show();
             }
 
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(getContext(), "Database error: " + databaseError.getMessage(),
@@ -204,9 +224,11 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+
     // In the loadProfilePicture() method, update to:
     private void loadProfilePicture() {
         if (username == null || username.isEmpty()) return;
+
 
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
         usersRef.orderByChild("username").equalTo(username).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -227,6 +249,7 @@ public class ProfileFragment extends Fragment {
                 }
             }
 
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(getContext(), "Database error: " + databaseError.getMessage(),
@@ -234,6 +257,7 @@ public class ProfileFragment extends Fragment {
             }
         });
     }
+
 
     // All existing methods remain unchanged below this point
     private void fetchUserDataAndLaunchEdit() {
@@ -258,6 +282,7 @@ public class ProfileFragment extends Fragment {
                 }
             }
 
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(getContext(), "Database error: " + databaseError.getMessage(),
@@ -265,6 +290,7 @@ public class ProfileFragment extends Fragment {
             }
         });
     }
+
 
     private void launchEditProfileActivity(String userId) {
         Intent intent = new Intent(getActivity(), EditProfileActivity.class);
@@ -277,6 +303,7 @@ public class ProfileFragment extends Fragment {
         startActivity(intent);
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -284,8 +311,10 @@ public class ProfileFragment extends Fragment {
         loadProfilePicture();
     }
 
+
     private void loadUserData() {
         if (username == null || username.isEmpty()) return;
+
 
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
         usersRef.orderByChild("username").equalTo(username).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -308,6 +337,7 @@ public class ProfileFragment extends Fragment {
                 }
             }
 
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(getContext(), "Database error: " + databaseError.getMessage(),
@@ -315,6 +345,7 @@ public class ProfileFragment extends Fragment {
             }
         });
     }
+
 
     private void showRatingDialog() {
         RatingBar ratingBar = new RatingBar(requireContext(), null, android.R.attr.ratingBarStyle);
@@ -326,16 +357,19 @@ public class ProfileFragment extends Fragment {
         ratingBar.setRating(0);
         ratingBar.setIsIndicator(false);
 
+
         try {
             ratingBar.setProgressTintList(getResources().getColorStateList(R.color.rating_bar));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+
         LinearLayout layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(100, 50, 100, 50);
         layout.addView(ratingBar);
+
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Rate Our App")
@@ -347,6 +381,7 @@ public class ProfileFragment extends Fragment {
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
     private void showSupportDialog() {
         TextView message = new TextView(requireContext());
@@ -360,7 +395,9 @@ public class ProfileFragment extends Fragment {
                         "• Chat: Message with other users\n" +
                         "• Profile: Account settings and info\n\n"
 
+
         );
+
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("App Support")
@@ -368,6 +405,7 @@ public class ProfileFragment extends Fragment {
                 .setPositiveButton("OK", null)
                 .show();
     }
+
 
     private void showDeleteAccountDialog() {
         new AlertDialog.Builder(requireContext())
@@ -384,3 +422,4 @@ public class ProfileFragment extends Fragment {
                 .show();
     }
 }
+

@@ -256,7 +256,7 @@ public class UploadActivity extends AppCompatActivity {
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String userName = "Неизвестный пользователь";
+                String userName = "Test User";
                 if (snapshot.exists() && snapshot.child("name").exists()) {
                     userName = snapshot.child("username").getValue(String.class);
                 }
@@ -274,27 +274,27 @@ public class UploadActivity extends AppCompatActivity {
                 if (isEditMode) {
                     wardrobeRef.child(itemId).setValue(item)
                             .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(UploadActivity.this, "Предмет обновлен", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(UploadActivity.this, "Item updated", Toast.LENGTH_SHORT).show();
                                 finish();
                             })
                             .addOnFailureListener(e ->
-                                    Toast.makeText(UploadActivity.this, "Ошибка обновления", Toast.LENGTH_SHORT).show());
+                                    Toast.makeText(UploadActivity.this, "Update failed", Toast.LENGTH_SHORT).show());
                 } else {
                     String newItemId = wardrobeRef.push().getKey();
                     item.setId(newItemId);
                     wardrobeRef.child(newItemId).setValue(item)
                             .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(UploadActivity.this, "Предмет добавлен", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(UploadActivity.this, "Item added", Toast.LENGTH_SHORT).show();
                                 finish();
                             })
                             .addOnFailureListener(e ->
-                                    Toast.makeText(UploadActivity.this, "Ошибка добавления предмета", Toast.LENGTH_SHORT).show());
+                                    Toast.makeText(UploadActivity.this, "Failed to add item", Toast.LENGTH_SHORT).show());
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(UploadActivity.this, "Ошибка получения данных пользователя", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UploadActivity.this, "Failed to get user data", Toast.LENGTH_SHORT).show();
             }
         });
     }

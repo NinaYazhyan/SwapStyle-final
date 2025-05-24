@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import java.util.List;
@@ -63,7 +65,18 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
                 .centerCrop()
                 .into(holder.imageView);
 
+        // Add image click listener to show dialog
+        holder.imageView.setOnClickListener(v -> {
+            if (context instanceof FragmentActivity) {
+                Fragment currentFragment = ((FragmentActivity) context)
+                        .getSupportFragmentManager()
+                        .findFragmentById(R.id.frame_lay);
 
+                if (currentFragment instanceof HomeFragment) {
+                    ((HomeFragment) currentFragment).showImageDialog(item.getImageUrl());
+                }
+            }
+        });
 
         holder.messageButton.setOnClickListener(v -> {
             if (messageListener != null) {
@@ -73,15 +86,13 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
         holder.titleTextView.setText(item.getTitle());
         holder.descriptionTextView.setText(item.getDescription());
         holder.categoryTextView.setText(item.getCategory() + " - " + item.getSubcategory());
-        holder.sizeTextView.setText("Размер: " + item.getSize());
-
-
+        holder.sizeTextView.setText("Size: " + item.getSize());
 
         // Set user name
         if (item.getUserName() != null && !item.getUserName().isEmpty()) {
-            holder.userNameTextView.setText("Владелец: " + item.getUserName());
+            holder.userNameTextView.setText("Owner: " + item.getUserName());
         } else {
-            holder.userNameTextView.setText("Владелец: Неизвестно");
+            holder.userNameTextView.setText("Owner: Test User");
         }
 
         // Initially hide the description
@@ -110,5 +121,11 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
     @Override
     public int getItemCount() {
         return itemList.size();
+    }
+
+    public void updateList(List<WardrobeItem> newList) {
+        itemList.clear();
+        itemList.addAll(newList);
+        notifyDataSetChanged();
     }
 }

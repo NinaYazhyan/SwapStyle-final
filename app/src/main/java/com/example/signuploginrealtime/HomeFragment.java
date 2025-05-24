@@ -7,16 +7,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -67,11 +70,47 @@ public class HomeFragment extends Fragment {
         // Set filter button click listener
         btnFilter.setOnClickListener(v -> openFilterActivity());
 
+        // Add text change listener for search functionality
+        searchEditText.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                filterBySearch(s.toString());
+            }
+        });
+
         loadWardrobeItems();
 
         return view;
     }
 
+    private void filterBySearch(String searchText) {
+        if (itemList == null || itemList.isEmpty()) {
+            return;
+        }
+
+        List<WardrobeItem> filteredList = new ArrayList<>();
+
+        for (WardrobeItem item : itemList) {
+            if (item.getTitle().toLowerCase().contains(searchText.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+
+        adapter.updateList(filteredList);
+
+        if (filteredList.isEmpty()) {
+            emptyStateText.setText("No items match your search");
+            emptyStateText.setVisibility(View.VISIBLE);
+        } else {
+            emptyStateText.setVisibility(View.GONE);
+        }
+    }
 
     private void loadWardrobeItems() {
         progressBar.setVisibility(View.VISIBLE);
@@ -178,5 +217,55 @@ public class HomeFragment extends Fragment {
                 progressBar.setVisibility(View.GONE);
             }
         });
+    }
+
+    // New method for showing image dialog
+    public void showImageDialog(ImageView imageView) {
+        // Create dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_image_view, null);
+        builder.setView(dialogView);
+
+        // Get dialog views
+        ImageView dialogImageView = dialogView.findViewById(R.id.dialog_image_view);
+        Button closeButton = dialogView.findViewById(R.id.dialog_close_button);
+
+        // Set the image from the clicked ImageView
+        dialogImageView.setImageDrawable(imageView.getDrawable());
+
+        // Create and show the dialog
+        AlertDialog dialog = builder.create();
+
+        // Set up close button
+        closeButton.setOnClickListener(v -> dialog.dismiss());
+
+        // Show dialog
+        dialog.show();
+    }
+
+    // Alternative method that accepts image URL
+    public void showImageDialog(String imageUrl) {
+        // Create dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_image_view, null);
+        builder.setView(dialogView);
+
+        // Get dialog views
+        ImageView dialogImageView = dialogView.findViewById(R.id.dialog_image_view);
+        Button closeButton = dialogView.findViewById(R.id.dialog_close_button);
+
+        // Load the image using Glide
+        Glide.with(this)
+                .load(imageUrl)
+                .into(dialogImageView);
+
+        // Create and show the dialog
+        AlertDialog dialog = builder.create();
+
+        // Set up close button
+        closeButton.setOnClickListener(v -> dialog.dismiss());
+
+        // Show dialog
+        dialog.show();
     }
 }

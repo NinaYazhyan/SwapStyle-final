@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions (Unchanged) -->
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -16,12 +16,12 @@
         android:maxSdkVersion="28"
         tools:ignore="ScopedStorage" />
 
-    <!-- Hardware Features (Unchanged) -->
+    <!-- Hardware Features -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <!-- Queries (Unchanged) -->
+    <!-- Queries -->
     <queries>
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
@@ -49,16 +49,22 @@
         android:theme="@style/Theme.SignupLoginRealtime"
         tools:targetApi="34">
 
-        <!-- Existing Activities (Unchanged) -->
+        <!-- SPLASH SCREEN - now the launcher activity -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:launchMode="singleTask">
+            android:name=".SplashActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- MainActivity (starts after splash screen) -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask" />
+
         <activity
             android:name=".UploadActivity"
             android:exported="false"
@@ -70,6 +76,7 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".LoginActivity"
             android:exported="false"
@@ -90,7 +97,7 @@
             android:name=".FilterActivity"
             android:exported="false" />
 
-        <!-- Chat-Related Activities (Added) -->
+        <!-- Chat-Related Activities -->
         <activity
             android:name=".UserSearchActivity"
             android:exported="false"
@@ -103,7 +110,7 @@
             android:name=".ChatProfileActivity"
             android:exported="false" />
 
-        <!-- Existing Providers and Services (Unchanged) -->
+        <!-- Existing Providers and Services -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -113,6 +120,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
         <service
             android:name="com.google.firebase.components.ComponentDiscoveryService"
             android:exported="false">
@@ -121,7 +129,7 @@
                 android:value="com.google.firebase.components.ComponentRegistrar" />
         </service>
 
-        <!-- Firebase Config (Unchanged) -->
+        <!-- Firebase Config -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="default_channel" />
@@ -141,4 +149,5 @@
             android:name="firebase_auth_persistence"
             android:value="local" />
     </application>
+
 </manifest>

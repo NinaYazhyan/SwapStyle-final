@@ -8,7 +8,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="@drawable/img"
+        android:background="@drawable/img_6"
         tools:context=".SignupActivity">
 
     <androidx.cardview.widget.CardView

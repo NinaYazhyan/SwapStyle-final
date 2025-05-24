@@ -4,9 +4,9 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
-    android:background="@android:color/white"
+    android:background="@drawable/rounded_chat_background"
     android:elevation="4dp"
-    android:layout_marginBottom="8dp">
+    android:layout_margin="8dp">
 
     <!-- Item Image -->
     <ImageView
