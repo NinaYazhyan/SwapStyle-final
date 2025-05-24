@@ -1,5 +1,6 @@
 package com.example.signuploginrealtime;
 
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,17 +8,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";
+
 
     EditText signupName, signupEmail, signupUsername, signupPassword, signupLocation;
     TextView loginRedirectText;
@@ -26,13 +33,16 @@ public class SignupActivity extends AppCompatActivity {
     FirebaseDatabase database;
     DatabaseReference reference;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
+
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+
 
         // Initialize views
         signupName = findViewById(R.id.signup_name);
@@ -43,6 +53,7 @@ public class SignupActivity extends AppCompatActivity {
         signupButton = findViewById(R.id.signup_button);
         loginRedirectText = findViewById(R.id.loginRedirectText);
 
+
         signupButton.setOnClickListener(view -> {
             // Get input values
             String name = signupName.getText().toString().trim();
@@ -51,11 +62,13 @@ public class SignupActivity extends AppCompatActivity {
             String password = signupPassword.getText().toString().trim();
             String location = signupLocation.getText().toString().trim();
 
+
             // Validate inputs
             if (name.isEmpty() || email.isEmpty() || username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(SignupActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
+
 
             // Create user with Firebase Authentication
             mAuth.createUserWithEmailAndPassword(email, password)
@@ -71,8 +84,10 @@ public class SignupActivity extends AppCompatActivity {
                                                         "Verification email sent. Please check your email.",
                                                         Toast.LENGTH_LONG).show();
 
+
                                                 // Save user to database
                                                 saveUserToDatabase(firebaseUser.getUid(), name, email, username, password, location);
+
 
                                                 // Redirect to VerifyEmailActivity
                                                 Intent intent = new Intent(SignupActivity.this, VerifyEmailActivity.class);
@@ -93,19 +108,23 @@ public class SignupActivity extends AppCompatActivity {
                     });
         });
 
+
         loginRedirectText.setOnClickListener(view -> {
             startActivity(new Intent(SignupActivity.this, LoginActivity.class));
             finish();
         });
     }
 
+
     private void saveUserToDatabase(String userId, String name, String email, String username, String password, String location) {
         // Initialize Firebase Database
         database = FirebaseDatabase.getInstance();
         reference = database.getReference("users");
 
+
         // Create user object
         HelperClass helperClass = new HelperClass(name, email, username, password, location);
+
 
         // Save to Firebase
         reference.child(userId).setValue(helperClass)
@@ -119,3 +138,4 @@ public class SignupActivity extends AppCompatActivity {
                 });
     }
 }
+
