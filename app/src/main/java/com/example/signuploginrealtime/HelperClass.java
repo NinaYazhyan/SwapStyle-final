@@ -11,6 +11,7 @@ public class HelperClass {
     private String password;
     private String location;
 
+
     // Empty constructor (required for Firebase)
     public HelperClass() {
         this.name = "";
@@ -18,18 +19,30 @@ public class HelperClass {
         this.username = "";
         this.password = "";
         this.location = "";
+
     }
 
-    // Parameterized constructor
+    // Existing parameterized constructor
     public HelperClass(String name, String email, String username, String password, String location) {
         this.name = name != null ? name : "";
         this.email = email != null ? email : "";
         this.username = username != null ? username : "";
         this.password = password != null ? password : "";
         this.location = location != null ? location : "";
+
     }
 
-    // Getters and Setters
+    // New constructor with country parameter
+    public HelperClass(String name, String email, String username, String password, String location, String country) {
+        this.name = name != null ? name : "";
+        this.email = email != null ? email : "";
+        this.username = username != null ? username : "";
+        this.password = password != null ? password : "";
+        this.location = location != null ? location : "";
+
+    }
+
+    // Existing getters and setters
     public String getName() {
         return name;
     }
@@ -70,6 +83,10 @@ public class HelperClass {
         this.location = location != null ? location : "";
     }
 
+    // New getter and setter for country
+
+
+
     @Override
     public String toString() {
         return "User{" +
@@ -77,6 +94,7 @@ public class HelperClass {
                 ", email='" + email + '\'' +
                 ", username='" + username + '\'' +
                 ", location='" + location + '\'' +
+
                 '}';
     }
 }

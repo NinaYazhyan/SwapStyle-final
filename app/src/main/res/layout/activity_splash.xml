@@ -30,8 +30,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Swap clothes. Save the planet."
-        android:textSize="25sp"
-        android:textColor="#5D3A9B"
+        android:textSize="15sp"
+        android:textColor="#FFC1CC"
         android:layout_below="@id/appName"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />

@@ -96,19 +96,8 @@
                 android:padding="8dp"
                 android:textColor="@color/black" />
             <!-- Country Selection -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Country:"
-                android:textColor="@color/white"
-                android:layout_marginTop="8dp"/>
 
-            <Spinner
-                android:id="@+id/country_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:drawable/btn_dropdown"
-                android:spinnerMode="dropdown"/>
+            <!-- Country Selection (directly after the location field) -->
 
 
             <Button
