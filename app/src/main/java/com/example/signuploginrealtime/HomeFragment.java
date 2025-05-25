@@ -151,8 +151,18 @@ public class HomeFragment extends Fragment {
         if (item.getUserId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
             Toast.makeText(getContext(), "You cannot message yourself", Toast.LENGTH_SHORT).show();
         } else {
-            // Start ChatActivity with the recipient's user ID and username
-            ChatActivity.start(getContext(), item.getUserId(), item.getUserName());
+            // Create intent with recipient's user ID, username, and product information
+            Intent intent = new Intent(getContext(), ChatActivity.class);
+            intent.putExtra("RECIPIENT_ID", item.getUserId());
+            intent.putExtra("RECIPIENT_NAME", item.getUserName());
+
+            // Add product information
+            intent.putExtra("PRODUCT_ID", item.getId());
+            intent.putExtra("PRODUCT_TITLE", item.getTitle());
+            intent.putExtra("PRODUCT_IMAGE_URL", item.getImageUrl());
+            intent.putExtra("AUTO_SEND_PRODUCT", true);
+
+            startActivity(intent);
         }
     }
 

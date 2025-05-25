@@ -31,6 +31,12 @@ public class ChatActivity extends AppCompatActivity {
 
     private static final String EXTRA_USER_ID = "userId";
     private static final String EXTRA_USER_NAME = "userName";
+    private static final String EXTRA_RECIPIENT_ID = "RECIPIENT_ID";
+    private static final String EXTRA_RECIPIENT_NAME = "RECIPIENT_NAME";
+    private static final String EXTRA_PRODUCT_ID = "PRODUCT_ID";
+    private static final String EXTRA_PRODUCT_TITLE = "PRODUCT_TITLE";
+    private static final String EXTRA_PRODUCT_IMAGE_URL = "PRODUCT_IMAGE_URL";
+    private static final String EXTRA_AUTO_SEND_PRODUCT = "AUTO_SEND_PRODUCT";
 
     private RecyclerView recyclerViewMessages;
     private EditText messageEditText;
@@ -61,10 +67,10 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // Проверка авторизации
+        // Authorization check
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
-            Toast.makeText(this, "Необходимо войти в систему", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You need to log in", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
@@ -72,29 +78,62 @@ public class ChatActivity extends AppCompatActivity {
 
         currentUserId = currentUser.getUid();
 
-        // Получение данных собеседника
+        // Getting the chat partner's data
         chatUserId = getIntent().getStringExtra(EXTRA_USER_ID);
+        if (chatUserId == null) {
+            chatUserId = getIntent().getStringExtra(EXTRA_RECIPIENT_ID);
+        }
+
         chatUserName = getIntent().getStringExtra(EXTRA_USER_NAME);
+        if (chatUserName == null) {
+            chatUserName = getIntent().getStringExtra(EXTRA_RECIPIENT_NAME);
+        }
 
         if (chatUserId == null || chatUserName == null) {
-            Toast.makeText(this, "Ошибка: данные пользователя отсутствуют", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error: user data is missing", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Инициализация Firebase
+        // Firebase initialization
         String chatId = getChatId(currentUserId, chatUserId);
         messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(chatId);
         recentChatsRef = FirebaseDatabase.getInstance().getReference("recent_chats");
 
-        // Инициализация UI
+        // UI initialization
         initUI();
 
-        // Получение имени текущего пользователя
+        // Getting the current user's name
         getCurrentUserName();
 
-        // Загрузка сообщений
+        // Loading messages
         loadMessages();
+
+        // Check if we should auto-send product information
+        if (getIntent().getBooleanExtra(EXTRA_AUTO_SEND_PRODUCT, false)) {
+            String productId = getIntent().getStringExtra(EXTRA_PRODUCT_ID);
+            String productTitle = getIntent().getStringExtra(EXTRA_PRODUCT_TITLE);
+
+            // Create product reference message
+            String productMessage = "Hi! I'm interested in your item: " + productTitle +
+                    "\nProduct ID: " + productId;
+
+            // Send the message
+            sendProductMessage(productMessage);
+        }
+    }
+
+    private void sendProductMessage(String productMessage) {
+        // We need to ensure currentUserName is loaded before sending
+        if (currentUserName == null) {
+            // If currentUserName is not loaded yet, wait a bit and try again
+            new android.os.Handler().postDelayed(() ->
+                    sendProductMessage(productMessage), 500);
+            return;
+        }
+
+        // Send the product message
+        sendMessageWithContent(productMessage);
     }
 
     private void initUI() {
@@ -126,13 +165,13 @@ public class ChatActivity extends AppCompatActivity {
                         if (snapshot.exists() && snapshot.hasChild("username")) {
                             currentUserName = snapshot.child("username").getValue(String.class);
                         } else {
-                            currentUserName = "Пользователь";
+                            currentUserName = "User";
                         }
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        currentUserName = "Пользователь";
+                        currentUserName = "User";
                     }
                 });
     }
@@ -157,7 +196,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(ChatActivity.this, "Ошибка загрузки сообщений", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, "Error loading messages", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -168,35 +207,43 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
+        sendMessageWithContent(content);
+        messageEditText.setText("");
+    }
+
+    private void sendMessageWithContent(String content) {
+        if (content.isEmpty()) {
+            return;
+        }
+
         long timestamp = System.currentTimeMillis();
         Message message = new Message(currentUserId, content, timestamp);
 
-        // Сохранение сообщения
+        // Saving the message
         String messageId = messagesRef.push().getKey();
         if (messageId != null) {
             messagesRef.child(messageId).setValue(message)
                     .addOnSuccessListener(aVoid -> {
-                        messageEditText.setText("");
                         updateRecentChats(content, timestamp);
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(ChatActivity.this, "Ошибка отправки: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(ChatActivity.this, "Sending error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                     );
         }
     }
 
     private void updateRecentChats(String lastMessage, long timestamp) {
-        // Обновление для текущего пользователя
+        // Update for current user
         RecentChat myRecentChat = new RecentChat(chatUserId, chatUserName, lastMessage, timestamp);
         recentChatsRef.child(currentUserId).child(chatUserId).setValue(myRecentChat);
 
-        // Обновление для собеседника
+        // Update for chat partner
         RecentChat theirRecentChat = new RecentChat(currentUserId, currentUserName, lastMessage, timestamp);
         recentChatsRef.child(chatUserId).child(currentUserId).setValue(theirRecentChat);
     }
 
     private String getChatId(String userId1, String userId2) {
-        // Создаем уникальный ID чата, сортируя ID пользователей
+        // Create a unique chat ID by sorting user IDs
         return userId1.compareTo(userId2) < 0 ? userId1 + "_" + userId2 : userId2 + "_" + userId1;
     }
 }

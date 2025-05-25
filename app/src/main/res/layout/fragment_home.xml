@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Filter"
-            android:layout_marginStart="230dp"
+            android:layout_marginStart="550dp"
             app:layout_constraintStart_toEndOf="@id/titleTextView"
             app:layout_constraintTop_toTopOf="@id/titleTextView" />
 

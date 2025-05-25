@@ -7,8 +7,8 @@
 
     <ImageView
         android:id="@+id/logoImage"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="152dp"
+        android:layout_height="149dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="150dp"
         android:src="@drawable/logo" />
@@ -18,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="SwapStyle"
-        android:textSize="45sp"
+        android:textSize="70sp"
         android:textStyle="bold"
         android:textColor="#5D3A9B"
         android:layout_below="@id/logoImage"
@@ -30,8 +30,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Swap clothes. Save the planet."
-        android:textSize="15sp"
-        android:textColor="#FFC1CC"
+        android:textSize="45sp"
+        android:textColor="#2B0033"
         android:layout_below="@id/appName"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
